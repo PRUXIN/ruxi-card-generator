@@ -48,7 +48,7 @@ module.exports = async function handler(req, res) {
     lines = [words.slice(0, mid).join(' '), words.slice(mid).join(' ')].filter(l => l);
   }
 
-  const headlineStartY = 150;
+  const headlineStartY = 165;
   const lineHeight = 58;
   const headlineEndY = headlineStartY + (lines.length * lineHeight);
 
@@ -61,14 +61,14 @@ module.exports = async function handler(req, res) {
     <clipPath id="imgClip">
       <rect x="580" y="36" width="580" height="556" rx="16"/>
     </clipPath>
-    <image x="580" y="36" width="580" height="556" href="${bgBase64}" preserveAspectRatio="xMidYMid slice" clip-path="url(#imgClip)" opacity="0.85"/>
+    <image x="540" y="36" width="620" height="556" href="${bgBase64}" preserveAspectRatio="xMidYMid slice" clip-path="url(#imgClip)" opacity="0.85"/>
     <defs>
       <linearGradient id="fade" x1="0%" y1="0%" x2="100%" y2="0%">
         <stop offset="0%" style="stop-color:${bg};stop-opacity:1"/>
         <stop offset="45%" style="stop-color:${bg};stop-opacity:0"/>
       </linearGradient>
     </defs>
-    <rect x="580" y="36" width="580" height="556" fill="url(#fade)"/>
+    <rect x="540" y="36" width="620" height="556" fill="url(#fade)"/>
     ` : ''}
 
     ${overlayBase64 ? `<image x="700" y="160" width="420" height="320" href="${overlayBase64}" preserveAspectRatio="xMidYMid meet"/>` : ''}
@@ -76,7 +76,7 @@ module.exports = async function handler(req, res) {
     ${logoBase64 ? `<image x="40" y="20" width="148" height="42" href="${logoBase64}" preserveAspectRatio="xMinYMid meet"/>` : ''}
 
     <rect x="40" y="82" width="${pillWidth}" height="34" rx="17" fill="none" stroke="${accent}" stroke-width="1.5"/>
-    <text x="${40 + pillWidth / 2}" y="100" font-family="Arial,sans-serif" font-size="11" font-weight="bold" fill="${accent}" text-anchor="middle" letter-spacing="1">${config.label}</text>
+    <text x="${40 + pillWidth / 2}" y="96" font-family="Arial,sans-serif" font-size="11" font-weight="bold" fill="${accent}" text-anchor="middle" dominant-baseline="middle" letter-spacing="1">${config.label}</text> font-family="Arial,sans-serif" font-size="11" font-weight="bold" fill="${accent}" text-anchor="middle" letter-spacing="1">${config.label}</text>
 
     ${lines.map((line, i) => `<text x="40" y="${headlineStartY + (i * lineHeight)}" font-family="Arial,sans-serif" font-size="46" font-weight="bold" fill="${textColor}" letter-spacing="-2">${line}</text>`).join('\n')}
 
@@ -87,7 +87,7 @@ module.exports = async function handler(req, res) {
     <rect x="40" y="${headlineEndY + 90}" width="230" height="48" rx="24" fill="${config.ctaColor}"/>
     <text x="155" y="${headlineEndY + 120}" font-family="Arial,sans-serif" font-size="13" font-weight="bold" fill="${config.ctaTextColor}" text-anchor="middle" letter-spacing="0.5">${cta.toUpperCase()}</text>
 
-    <text x="155" y="${headlineEndY + 158}" font-family="Arial,sans-serif" font-size="13" font-weight="bold" fill="#132F67" text-anchor="middle" text-decoration="underline">pruxin.com/clara</text>
+    fill="${isDark ? '#AAAACC' : '#132F67'}" text-anchor="middle" text-decoration="underline">pruxin.com/clara</text>
   </svg>`;
 
   res.setHeader('Content-Type', 'image/svg+xml');
