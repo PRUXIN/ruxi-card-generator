@@ -1,12 +1,11 @@
 module.exports = async function handler(req, res) {
   const industry = req.query.industry || 'accountants';
-  const theme = req.query.theme || 'dark';
-  const headline = req.query.headline || 'Your next client just called.';
-  const subheadline = req.query.subheadline || 'Nobody answered.';
-  const painstat = req.query.painstat || '62% of callers never call back.';
+  const theme = req.query.theme || 'light';
+  const headline = req.query.headline || 'Your phones ring at 9pm. Clara answers.';
+  const subheadline = req.query.subheadline || 'Never miss a new client enquiry.';
+  const painstat = req.query.painstat || '62% of clients switch firms due to poor communication';
   const cta = req.query.cta || 'Book a Demo';
 
-  // Map industry to image filename
   const imageMap = {
     'accountants': 'Accountants.png',
     'legal': 'Legal _ Solicitors.png',
@@ -33,32 +32,52 @@ module.exports = async function handler(req, res) {
 
   const isDark = theme === 'dark';
   const bg = isDark ? '#07091A' : '#FFFFFF';
-  const textColor = isDark ? '#FFFFFF' : '#1A1A2E';
+  const textColor = isDark ? '#FFFFFF' : '#0A0508';
+  const subColor = isDark ? '#AAAACC' : '#333333';
   const accent = '#C9A84C';
+  const statColor = '#B98D10';
+  const urlColor = isDark ? '#8888AA' : '#132F67';
 
-  const bgImageTag = bgBase64
-    ? `<image x="600" y="0" width="600" height="628" href="${bgBase64}" preserveAspectRatio="xMidYMid meet"/>`
-    : '';
+  const bgImageTag = bgBase64 ? `
+    <clipPath id="imgClip">
+      <rect x="580" y="36" width="580" height="556" rx="16"/>
+    </clipPath>
+    <image x="580" y="36" width="580" height="556" href="${bgBase64}" preserveAspectRatio="xMidYMid slice" clip-path="url(#imgClip)" opacity="0.85"/>
+    <defs>
+      <linearGradient id="fade" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" style="stop-color:${bg};stop-opacity:1"/>
+        <stop offset="50%" style="stop-color:${bg};stop-opacity:0"/>
+      </linearGradient>
+    </defs>
+    <rect x="580" y="36" width="580" height="556" fill="url(#fade)"/>
+    <rect x="830" y="357" width="160" height="34" rx="17" fill="#E13A3A"/>
+    <text x="910" y="379" font-family="Arial,sans-serif" font-size="12" font-weight="bold" fill="white" text-anchor="middle" letter-spacing="0.6">📞 MISSED CALL</text>
+  ` : '';
 
   const svg = `<svg width="1200" height="628" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
     <rect width="1200" height="628" fill="${bg}"/>
     ${bgImageTag}
-    <defs>
-      <linearGradient id="fade" x1="0%" y1="0%" x2="100%" y2="0%">
-        <stop offset="0%" style="stop-color:${bg};stop-opacity:1" />
-        <stop offset="60%" style="stop-color:${bg};stop-opacity:0" />
-      </linearGradient>
-    </defs>
-    <rect x="600" y="0" width="600" height="628" fill="url(#fade)"/>
-    <rect x="0" y="0" width="8" height="628" fill="${accent}"/>
-    <rect x="60" y="60" width="160" height="32" rx="16" fill="${accent}"/>
-    <text x="140" y="82" font-family="Arial,sans-serif" font-size="13" font-weight="bold" fill="#000000" text-anchor="middle">${industry.toUpperCase()}</text>
-    <text x="60" y="160" font-family="Arial,sans-serif" font-size="52" font-weight="bold" fill="${textColor}">${headline}</text>
-    <text x="60" y="230" font-family="Arial,sans-serif" font-size="22" fill="${isDark ? '#AAAACC' : '#555577'}">${subheadline}</text>
-    <text x="60" y="290" font-family="Arial,sans-serif" font-size="16" font-weight="bold" fill="${accent}">${painstat}</text>
-    <rect x="60" y="320" width="200" height="52" rx="8" fill="${accent}"/>
-    <text x="160" y="352" font-family="Arial,sans-serif" font-size="16" font-weight="bold" fill="#000000" text-anchor="middle">${cta}</text>
-    <text x="280" y="352" font-family="Arial,sans-serif" font-size="14" fill="${isDark ? '#8888AA' : '#9999BB'}">pruxin.com/clara</text>
+
+    <!-- Industry pill - outlined -->
+    <rect x="40" y="100" width="200" height="36" rx="18" fill="none" stroke="${accent}" stroke-width="1.5"/>
+    <text x="140" y="123" font-family="Arial,sans-serif" font-size="12" font-weight="bold" fill="${accent}" text-anchor="middle" letter-spacing="1">${industry.toUpperCase()}</text>
+
+    <!-- Headline -->
+    <text x="40" y="210" font-family="Arial,sans-serif" font-size="46" font-weight="bold" fill="${textColor}" letter-spacing="-2">${headline.substring(0, 30)}</text>
+    <text x="40" y="265" font-family="Arial,sans-serif" font-size="46" font-weight="bold" fill="${textColor}" letter-spacing="-2">${headline.substring(30)}</text>
+
+    <!-- Subheadline -->
+    <text x="40" y="310" font-family="Arial,sans-serif" font-size="18" fill="${subColor}">${subheadline}</text>
+
+    <!-- Pain stat -->
+    <text x="40" y="360" font-family="Arial,sans-serif" font-size="16" font-weight="bold" fill="${statColor}">${painstat}</text>
+
+    <!-- CTA Button -->
+    <rect x="40" y="400" width="180" height="48" rx="24" fill="${accent}"/>
+    <text x="130" y="430" font-family="Arial,sans-serif" font-size="14" font-weight="bold" fill="#0A0508" text-anchor="middle" letter-spacing="0.5">${cta.toUpperCase()}</text>
+
+    <!-- URL -->
+    <text x="40" y="480" font-family="Arial,sans-serif" font-size="14" font-weight="bold" fill="${urlColor}" text-decoration="underline">pruxin.com/clara</text>
   </svg>`;
 
   res.setHeader('Content-Type', 'image/svg+xml');
