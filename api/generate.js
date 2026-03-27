@@ -34,14 +34,13 @@ module.exports = async function handler(req, res) {
   }
 
   const logoFile = isDark ? 'clara-logo-light.png' : 'clara-logo-dark.png';
-
   const [bgBase64, logoBase64, overlayBase64] = await Promise.all([
     fetchBase64(config.file),
     fetchBase64(logoFile),
     fetchBase64('overlay-' + industry.toLowerCase() + '.png')
   ]);
 
-  // Smart headline split
+  // Headline split
   let lines = [];
   if (headline.replace(/\.$/, '').includes('.')) {
     lines = headline.split('.').filter(function(s) { return s.trim(); }).map(function(s) { return s.trim() + '.'; });
@@ -51,64 +50,119 @@ module.exports = async function handler(req, res) {
     lines = [words.slice(0, mid).join(' '), words.slice(mid).join(' ')].filter(function(l) { return l; });
   }
 
-  const pillWidth = config.label.length * 7.5 + 32;
-  const pillX = 40;
-  const pillY = 82;
-  const pillH = 34;
-  const pillTextY = pillY + pillH / 2 + 4;
-  const headlineStartY = pillY + pillH + 28;
-  const lineHeight = 58;
-  const headlineEndY = headlineStartY + (lines.length * lineHeight);
+  // ─── LAYOUT CONSTANTS ───────────────────────────────
+  // Card
+  const CARD_W = 1200;
+  const CARD_H = 628;
 
-  let svgParts = [];
+  // Logo — 40px from top-left
+  const LOGO_X = 40;
+  const LOGO_Y = 40;
+  const LOGO_W = 148;
+  const LOGO_H = 42;
 
-  svgParts.push('<svg width="1200" height="628" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">');
-  svgParts.push('<rect width="1200" height="628" fill="' + bg + '"/>');
+  // Content zone — starts below logo area
+  // Top: 102px (40 logo + 20 gap = ~100, round to 102 per spec)
+  // Left: 40px, Right edge: 560px (content width 520px)
+  // Bottom: CARD_H - 52 = 576px
+  const CZ_X = 40;
+  const CZ_TOP = 102;
+  const CZ_BOTTOM = CARD_H - 52; // 576
+  const CZ_H = CZ_BOTTOM - CZ_TOP; // 474
 
+  // Image container — right side
+  // x: 600 (40 + 520 + 40), y: 77 (102 - 25 top offset), w: 560, h: 474
+  const IMG_X = 600;
+  const IMG_Y = 77;
+  const IMG_W = 560;
+  const IMG_H = 474;
+
+  // Content elements — stacked from CZ_TOP with exact gaps
+  const PILL_H = 34;
+  const PILL_W = config.label.length * 7.5 + 32;
+  const PILL_Y = CZ_TOP;
+
+  // Gap between pill and headline: 16px
+  const LINE_H = 56;
+  const HEADLINE_Y = PILL_Y + PILL_H + 16;
+  const HEADLINE_END_Y = HEADLINE_Y + lines.length * LINE_H;
+
+  // Gap between headline and subheadline: 16px
+  const SUB_Y = HEADLINE_END_Y + 16;
+  const SUB_H = 26;
+
+  // Gap between subheadline and stat: 32px
+  const STAT_Y = SUB_Y + SUB_H + 32;
+  const STAT_H = 24;
+
+  // CTA group (button + link with 16px gap) — pinned to bottom with 40px margin
+  const BTN_W = 230;
+  const BTN_H = 48;
+  const LINK_H = 20;
+  const CTA_GROUP_H = BTN_H + 16 + LINK_H; // 84px
+
+  // Position CTA group — use auto spacing but cap at bottom boundary
+  let BTN_Y = STAT_Y + STAT_H + 32;
+  const maxBtnY = CZ_BOTTOM - CTA_GROUP_H; // can't go below this
+  if (BTN_Y > maxBtnY) BTN_Y = maxBtnY;
+  const LINK_Y = BTN_Y + BTN_H + 16 + 14; // +14 for text baseline
+
+  // ─── BUILD SVG ──────────────────────────────────────
+  const parts = [];
+  parts.push('<svg width="' + CARD_W + '" height="' + CARD_H + '" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">');
+
+  // Background
+  parts.push('<rect width="' + CARD_W + '" height="' + CARD_H + '" fill="' + bg + '"/>');
+
+  // Image — right side with gradient fade
   if (bgBase64) {
-    svgParts.push('<defs>');
-    svgParts.push('<clipPath id="imgClip"><rect x="540" y="36" width="620" height="556" rx="16"/></clipPath>');
-    svgParts.push('<linearGradient id="fade" x1="0%" y1="0%" x2="100%" y2="0%">');
-    svgParts.push('<stop offset="0%" style="stop-color:' + bg + ';stop-opacity:1"/>');
-    svgParts.push('<stop offset="45%" style="stop-color:' + bg + ';stop-opacity:0"/>');
-    svgParts.push('</linearGradient>');
-    svgParts.push('</defs>');
-    svgParts.push('<image x="540" y="36" width="620" height="556" href="' + bgBase64 + '" preserveAspectRatio="xMidYMid slice" clip-path="url(#imgClip)" opacity="0.85"/>');
-    svgParts.push('<rect x="540" y="36" width="620" height="556" fill="url(#fade)"/>');
+    parts.push('<defs>');
+    parts.push('<clipPath id="imgClip"><rect x="' + IMG_X + '" y="' + IMG_Y + '" width="' + IMG_W + '" height="' + IMG_H + '" rx="16"/></clipPath>');
+    parts.push('<linearGradient id="fade" x1="0%" y1="0%" x2="100%" y2="0%">');
+    parts.push('<stop offset="0%" style="stop-color:' + bg + ';stop-opacity:1"/>');
+    parts.push('<stop offset="35%" style="stop-color:' + bg + ';stop-opacity:0"/>');
+    parts.push('</linearGradient>');
+    parts.push('</defs>');
+    parts.push('<image x="' + IMG_X + '" y="' + IMG_Y + '" width="' + IMG_W + '" height="' + IMG_H + '" href="' + bgBase64 + '" preserveAspectRatio="xMidYMid slice" clip-path="url(#imgClip)" opacity="0.9"/>');
+    parts.push('<rect x="' + IMG_X + '" y="' + IMG_Y + '" width="' + IMG_W + '" height="' + IMG_H + '" fill="url(#fade)"/>');
   }
 
+  // Overlay widget — positioned in middle-right of image
   if (overlayBase64) {
-    svgParts.push('<image x="700" y="180" width="380" height="260" href="' + overlayBase64 + '" preserveAspectRatio="xMidYMid meet"/>');
+    const OV_X = IMG_X + 60;
+    const OV_Y = IMG_Y + (IMG_H / 2) - 80;
+    parts.push('<image x="' + OV_X + '" y="' + OV_Y + '" width="340" height="200" href="' + overlayBase64 + '" preserveAspectRatio="xMidYMid meet"/>');
   }
 
+  // Clara logo
   if (logoBase64) {
-    svgParts.push('<image x="40" y="20" width="148" height="42" href="' + logoBase64 + '" preserveAspectRatio="xMinYMid meet"/>');
+    parts.push('<image x="' + LOGO_X + '" y="' + LOGO_Y + '" width="' + LOGO_W + '" height="' + LOGO_H + '" href="' + logoBase64 + '" preserveAspectRatio="xMinYMid meet"/>');
   }
 
   // Industry pill
-  svgParts.push('<rect x="' + pillX + '" y="' + pillY + '" width="' + pillWidth + '" height="' + pillH + '" rx="17" fill="none" stroke="' + accent + '" stroke-width="1.5"/>');
-  svgParts.push('<text x="' + (pillX + pillWidth / 2) + '" y="' + pillTextY + '" font-family="Arial,sans-serif" font-size="11" font-weight="bold" fill="' + accent + '" text-anchor="middle" letter-spacing="1">' + config.label + '</text>');
+  parts.push('<rect x="' + CZ_X + '" y="' + PILL_Y + '" width="' + PILL_W + '" height="' + PILL_H + '" rx="17" fill="none" stroke="' + accent + '" stroke-width="1.5"/>');
+  parts.push('<text x="' + (CZ_X + PILL_W / 2) + '" y="' + (PILL_Y + PILL_H / 2 + 4) + '" font-family="Arial,sans-serif" font-size="11" font-weight="bold" fill="' + accent + '" text-anchor="middle" letter-spacing="1">' + config.label + '</text>');
 
-  // Headline lines
+  // Headline
   lines.forEach(function(line, i) {
-    svgParts.push('<text x="40" y="' + (headlineStartY + i * lineHeight) + '" font-family="Arial,sans-serif" font-size="46" font-weight="bold" fill="' + textColor + '" letter-spacing="-2">' + line + '</text>');
+    parts.push('<text x="' + CZ_X + '" y="' + (HEADLINE_Y + i * LINE_H) + '" font-family="Arial,sans-serif" font-size="46" font-weight="bold" fill="' + textColor + '" letter-spacing="-2">' + line + '</text>');
   });
 
   // Subheadline
-  svgParts.push('<text x="40" y="' + (headlineEndY + 30) + '" font-family="Arial,sans-serif" font-size="17" fill="' + subColor + '">' + subheadline + '</text>');
+  parts.push('<text x="' + CZ_X + '" y="' + SUB_Y + '" font-family="Arial,sans-serif" font-size="17" fill="' + subColor + '">' + subheadline + '</text>');
 
   // Pain stat
-  svgParts.push('<text x="40" y="' + (headlineEndY + 68) + '" font-family="Arial,sans-serif" font-size="15" font-weight="bold" fill="' + accent + '">' + painstat + '</text>');
+  parts.push('<text x="' + CZ_X + '" y="' + STAT_Y + '" font-family="Arial,sans-serif" font-size="15" font-weight="bold" fill="' + accent + '">' + painstat + '</text>');
 
   // CTA button
-  svgParts.push('<rect x="40" y="' + (headlineEndY + 90) + '" width="230" height="48" rx="24" fill="' + config.ctaColor + '"/>');
-  svgParts.push('<text x="155" y="' + (headlineEndY + 120) + '" font-family="Arial,sans-serif" font-size="13" font-weight="bold" fill="' + config.ctaTextColor + '" text-anchor="middle" letter-spacing="0.5">' + cta.toUpperCase() + '</text>');
+  parts.push('<rect x="' + CZ_X + '" y="' + BTN_Y + '" width="' + BTN_W + '" height="' + BTN_H + '" rx="24" fill="' + config.ctaColor + '"/>');
+  parts.push('<text x="' + (CZ_X + BTN_W / 2) + '" y="' + (BTN_Y + BTN_H / 2 + 5) + '" font-family="Arial,sans-serif" font-size="13" font-weight="bold" fill="' + config.ctaTextColor + '" text-anchor="middle" letter-spacing="0.5">' + cta.toUpperCase() + '</text>');
 
-  // URL
-  svgParts.push('<text x="155" y="' + (headlineEndY + 158) + '" font-family="Arial,sans-serif" font-size="13" font-weight="bold" fill="' + urlColor + '" text-anchor="middle" text-decoration="underline">pruxin.com/clara</text>');
+  // URL link
+  parts.push('<text x="' + (CZ_X + BTN_W / 2) + '" y="' + LINK_Y + '" font-family="Arial,sans-serif" font-size="13" font-weight="bold" fill="' + urlColor + '" text-anchor="middle" text-decoration="underline">pruxin.com/clara</text>');
 
-  svgParts.push('</svg>');
+  parts.push('</svg>');
 
   res.setHeader('Content-Type', 'image/svg+xml');
-  res.status(200).send(svgParts.join('\n'));
+  res.status(200).send(parts.join('\n'));
 };
