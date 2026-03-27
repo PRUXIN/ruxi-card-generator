@@ -66,7 +66,7 @@ module.exports = async function handler(req, res) {
   // Left: 40px, Right edge: 560px (content width 520px)
   // Bottom: CARD_H - 52 = 576px
   const CZ_X = 40;
-  const CZ_TOP = 102;
+  const CZ_TOP = 115;
   const CZ_BOTTOM = CARD_H - 52; // 576
   const CZ_H = CZ_BOTTOM - CZ_TOP; // 474
 
@@ -84,7 +84,7 @@ module.exports = async function handler(req, res) {
 
   // Gap between pill and headline: 16px
   const LINE_H = 56;
-  const HEADLINE_Y = PILL_Y + PILL_H + 16;
+  const HEADLINE_Y = PILL_Y + PILL_H + 22;
   const HEADLINE_END_Y = HEADLINE_Y + lines.length * LINE_H;
 
   // Gap between headline and subheadline: 16px
@@ -129,9 +129,9 @@ module.exports = async function handler(req, res) {
 
   // Overlay widget — positioned in middle-right of image
   if (overlayBase64) {
-    const OV_X = IMG_X + 60;
-    const OV_Y = IMG_Y + (IMG_H / 2) - 80;
-    parts.push('<image x="' + OV_X + '" y="' + OV_Y + '" width="340" height="200" href="' + overlayBase64 + '" preserveAspectRatio="xMidYMid meet"/>');
+    const OV_X = IMG_X + 20;
+const OV_Y = IMG_Y + (IMG_H / 2) - 140;
+parts.push('<image x="' + OV_X + '" y="' + OV_Y + '" width="420" height="340" height="200" href="' + overlayBase64 + '" preserveAspectRatio="xMidYMid meet"/>');
   }
 
   // Clara logo
