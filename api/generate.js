@@ -15,7 +15,7 @@ module.exports = async function handler(req, res) {
   };
 
   const imageFile = imageMap[industry.toLowerCase()] || 'Accountants.png';
-  const imageUrl = `https://raw.githubusercontent.com/PRUXIN/clara-card-generator/main/public/${encodeURIComponent(imageFile)}`;
+  const imageUrl = `https://raw.githubusercontent.com/PRUXIN/clara-card-generator/main/assets/${encodeURIComponent(imageFile)}`;
 
   let bgBase64 = null;
   try {
