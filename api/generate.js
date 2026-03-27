@@ -5,33 +5,39 @@ module.exports = async function handler(req, res) {
   const subheadline = req.query.subheadline || 'Nobody answered.';
   const painstat = req.query.painstat || '62% of callers never call back.';
   const cta = req.query.cta || 'Book a Demo';
-  const bgImageUrl = req.query.bgImageUrl;
+
+  // Map industry to image filename
+  const imageMap = {
+    'accountants': 'Accountants.png',
+    'legal': 'Legal _ Solicitors.png',
+    'realestate': 'Real Estate.png',
+    'restaurants': 'Restaurants _ Hospitality.png'
+  };
+
+  const imageFile = imageMap[industry.toLowerCase()] || 'Accountants.png';
+  const imageUrl = `https://raw.githubusercontent.com/PRUXIN/clara-card-generator/main/public/${encodeURIComponent(imageFile)}`;
+
+  let bgBase64 = null;
+  try {
+    const imgRes = await fetch(imageUrl);
+    const arrayBuffer = await imgRes.arrayBuffer();
+    const bytes = new Uint8Array(arrayBuffer);
+    let binary = '';
+    for (let i = 0; i < bytes.byteLength; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    bgBase64 = `data:image/png;base64,${Buffer.from(binary, 'binary').toString('base64')}`;
+  } catch (e) {
+    bgBase64 = null;
+  }
 
   const isDark = theme === 'dark';
   const bg = isDark ? '#07091A' : '#FFFFFF';
   const textColor = isDark ? '#FFFFFF' : '#1A1A2E';
   const accent = '#C9A84C';
 
-  let bgImage = '';
-  if (bgImageUrl) {
-    try {
-      const imgRes = await fetch(bgImageUrl, {   redirect: 'follow',   headers: {     'User-Agent': 'Mozilla/5.0'   } });
-      const arrayBuffer = await imgRes.arrayBuffer();
-      const bytes = new Uint8Array(arrayBuffer);
-      let binary = '';
-      for (let i = 0; i < bytes.byteLength; i++) {
-        binary += String.fromCharCode(bytes[i]);
-      }
-      const base64 = Buffer.from(binary, 'binary').toString('base64');
-      const contentType = imgRes.headers.get('content-type') || 'image/jpeg';
-      bgImage = `data:${contentType};base64,${base64}`;
-    } catch (e) {
-      bgImage = '';
-    }
-  }
-
-  const bgImageTag = bgImage
-    ? `<image x="600" y="0" width="600" height="628" href="${bgImage}" preserveAspectRatio="xMidYMid meet"/>`
+  const bgImageTag = bgBase64
+    ? `<image x="600" y="0" width="600" height="628" href="${bgBase64}" preserveAspectRatio="xMidYMid meet"/>`
     : '';
 
   const svg = `<svg width="1200" height="628" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -43,7 +49,7 @@ module.exports = async function handler(req, res) {
         <stop offset="60%" style="stop-color:${bg};stop-opacity:0" />
       </linearGradient>
     </defs>
-    <rect x="540" y="0" width="660" height="628" fill="url(#fade)"/>
+    <rect x="600" y="0" width="600" height="628" fill="url(#fade)"/>
     <rect x="0" y="0" width="8" height="628" fill="${accent}"/>
     <rect x="60" y="60" width="160" height="32" rx="16" fill="${accent}"/>
     <text x="140" y="82" font-family="Arial,sans-serif" font-size="13" font-weight="bold" fill="#000000" text-anchor="middle">${industry.toUpperCase()}</text>
