@@ -84,7 +84,7 @@ module.exports = async function handler(req, res) {
 
   // Gap between pill and headline: 16px
   const LINE_H = 56;
-  const HEADLINE_Y = PILL_Y + PILL_H + 22;
+  const HEADLINE_Y = PILL_Y + PILL_H + 22 + 46;
   const HEADLINE_END_Y = HEADLINE_Y + lines.length * LINE_H;
 
   // Gap between headline and subheadline: 16px
