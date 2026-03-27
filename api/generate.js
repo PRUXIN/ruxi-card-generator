@@ -34,7 +34,7 @@ module.exports = async function handler(req, res) {
 
   const [bgBase64, logoBase64, overlayBase64] = await Promise.all([
     fetchBase64(config.file),
-    fetchBase64(isDark ? 'clara-logo-dark.png' : 'clara-logo-light.png'),
+    fetchBase64(isDark ? 'clara-logo-light.png' : 'clara-logo-dark.png'),
     fetchBase64(`overlay-${industry.toLowerCase()}.png`)
   ]);
 
@@ -48,7 +48,7 @@ module.exports = async function handler(req, res) {
     lines = [words.slice(0, mid).join(' '), words.slice(mid).join(' ')].filter(l => l);
   }
 
-  const headlineStartY = 130;
+  const headlineStartY = 150;
   const lineHeight = 58;
   const headlineEndY = headlineStartY + (lines.length * lineHeight);
 
@@ -75,7 +75,7 @@ module.exports = async function handler(req, res) {
 
     ${logoBase64 ? `<image x="40" y="20" width="148" height="42" href="${logoBase64}" preserveAspectRatio="xMinYMid meet"/>` : ''}
 
-    <rect x="40" y="78" width="${pillWidth}" height="34" rx="17" fill="none" stroke="${accent}" stroke-width="1.5"/>
+    <rect x="40" y="82" width="${pillWidth}" height="34" rx="17" fill="none" stroke="${accent}" stroke-width="1.5"/>
     <text x="${40 + pillWidth / 2}" y="100" font-family="Arial,sans-serif" font-size="11" font-weight="bold" fill="${accent}" text-anchor="middle" letter-spacing="1">${config.label}</text>
 
     ${lines.map((line, i) => `<text x="40" y="${headlineStartY + (i * lineHeight)}" font-family="Arial,sans-serif" font-size="46" font-weight="bold" fill="${textColor}" letter-spacing="-2">${line}</text>`).join('\n')}
