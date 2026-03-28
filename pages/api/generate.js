@@ -45,9 +45,19 @@ export default async function handler(req) {
       fetchImage('overlay-' + industry.toLowerCase() + '.png')
     ]);
 
-    const bgSrc = `data:image/jpeg;base64,${btoa(String.fromCharCode(...new Uint8Array(bgBuffer)))}`;
-    const logoSrc = `data:image/png;base64,${btoa(String.fromCharCode(...new Uint8Array(logoBuffer)))}`;
-    const overlaySrc = `data:image/png;base64,${btoa(String.fromCharCode(...new Uint8Array(overlayBuffer)))}`;
+    function toBase64(buffer) {
+  const bytes = new Uint8Array(buffer);
+  let binary = '';
+  const chunk = 1024;
+  for (let i = 0; i < bytes.length; i += chunk) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + chunk));
+  }
+  return btoa(binary);
+}
+
+const bgSrc = `data:image/jpeg;base64,${toBase64(bgBuffer)}`;
+const logoSrc = `data:image/png;base64,${toBase64(logoBuffer)}`;
+const overlaySrc = `data:image/png;base64,${toBase64(overlayBuffer)}`;
 
     let lines = [];
     if (headline.replace(/\.$/, '').includes('.')) {
