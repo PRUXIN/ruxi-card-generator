@@ -148,63 +148,79 @@ module.exports = async function handler(req, res) {
   const CARD_W = 1080;
   const CARD_H = 1080;
   const PAD = 40;
-  const CORNER = 20;
 
-  // Zones
-  const LOGO_Y = 28;
+  // Background container: 40px padding, column, 20px gap between all elements
+  const LOGO_Y = PAD;
   const LOGO_H = 42;
-  const IMG_TOP = LOGO_Y + LOGO_H + 16;   // image starts just below logo
-  const IMG_W = CARD_W - PAD * 2;          // 1000px wide with padding
-  const IMG_H = 390;                        // fixed image height
+  const GAP = 20;
+
+  // Image zone
   const IMG_X = PAD;
-  const IMG_BOTTOM = IMG_TOP + IMG_H;       // ~476
+  const IMG_Y = LOGO_Y + LOGO_H + GAP;
+  const IMG_W = 1000;
+  const IMG_H = 435;
+  const IMG_BOTTOM = IMG_Y + IMG_H;
 
-  // Content below image
-  const PILL_Y = IMG_BOTTOM + 24;
-  const PILL_H = 34;
-  const HEADLINE_Y = PILL_Y + PILL_H + 20 + 52;  // +52 for font baseline
-  const LINE_H = 62;
-  const HEADLINE_END = HEADLINE_Y + lines.length * LINE_H;
-  const SUB_Y1 = HEADLINE_END + 20;
-  const SUB_Y2 = SUB_Y1 + 30;
-  const STAT_Y = (subLine2 ? SUB_Y2 : SUB_Y1) + 36;
-  const BTN_Y = STAT_Y + 36;
-  const BTN_H = 60;
-  const BTN_W = CARD_W - PAD * 2;
+  // Pill row (label + URL) — 20px gap after image
+  const PILL_Y = IMG_BOTTOM + GAP;
+  const PILL_H = 34; // 10px padding top/bottom + 13px text ≈ 33px, use 34
+  const PILL_TEXT_Y = PILL_Y + PILL_H / 2 + 5;
 
-  const pillWidth = config.label.length * 7.5 + 32;
+  // Headline — 20px gap after pill
+  const LINE_H = 87; // 72px font * 1.2 line-height
+  const HEADLINE_Y = PILL_Y + PILL_H + GAP + 72; // +72 for baseline
+  const HEADLINE_END = HEADLINE_Y + (lines.length - 1) * LINE_H;
+
+  // Subheadline — 20px gap after headline
+  const SUB_LINE_H = 36; // 24px * 1.5
+  const SUB_Y1 = HEADLINE_END + GAP + 24; // +24 for baseline
+  const SUB_Y2 = SUB_Y1 + SUB_LINE_H;
+
+  // Pain stat — 20px gap after subheadline
+  const lastSubY = subLine2 ? SUB_Y2 : SUB_Y1;
+  const STAT_Y = lastSubY + GAP + 24; // +24 for baseline
+
+  // CTA button — 20px gap after stat
+  // button padding: 24px top/bottom, so height = 24+31+24 = ~79px, use 80
+  const BTN_Y = STAT_Y + GAP;
+  const BTN_H = 80;
+  const BTN_W = CARD_W - PAD * 2; // 1000px
+
+  const pillWidth = config.label.length * 7.8 + 32;
+
+  // Gradient colours per theme
+  const grad1Start = isDark ? 'rgba(7,9,27,0)' : 'rgba(255,255,255,0)';
+  const grad1End   = isDark ? '#07091B'         : '#FFFFFF';
 
   const parts = [];
   parts.push('<svg width="' + CARD_W + '" height="' + CARD_H + '" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">');
 
-  // Card background with rounded corners
   parts.push('<defs>');
-  parts.push('<clipPath id="cardClip"><rect width="' + CARD_W + '" height="' + CARD_H + '" rx="' + CORNER + '"/></clipPath>');
-  if (bgBase64) {
-    parts.push('<clipPath id="imgClip"><rect x="' + IMG_X + '" y="' + IMG_TOP + '" width="' + IMG_W + '" height="' + IMG_H + '" rx="16"/></clipPath>');
-    parts.push('<linearGradient id="fade" x1="0%" y1="0%" x2="0%" y2="100%">');
-    parts.push('<stop offset="50%" style="stop-color:' + bg + ';stop-opacity:0"/>');
-    parts.push('<stop offset="100%" style="stop-color:' + bg + ';stop-opacity:1"/>');
-    parts.push('</linearGradient>');
-  }
+  // Image clip
+  parts.push('<clipPath id="imgClip"><rect x="' + IMG_X + '" y="' + IMG_Y + '" width="' + IMG_W + '" height="' + IMG_H + '" rx="16"/></clipPath>');
+  // Gradient 1 — vertical, bottom fade into bg colour
+  parts.push('<linearGradient id="grad1" x1="0%" y1="0%" x2="0%" y2="100%">');
+  parts.push('<stop offset="0%" style="stop-color:' + grad1Start + ';stop-opacity:0"/>');
+  parts.push('<stop offset="100%" style="stop-color:' + grad1End + ';stop-opacity:1"/>');
+  parts.push('</linearGradient>');
   parts.push('</defs>');
 
   // Card background
-  parts.push('<rect width="' + CARD_W + '" height="' + CARD_H + '" fill="' + bg + '" rx="' + CORNER + '"/>');
+  parts.push('<rect width="' + CARD_W + '" height="' + CARD_H + '" fill="' + bg + '"/>');
 
-  // Clara logo — top left, above image
+  // Clara logo
   if (logoBase64) {
-    parts.push('<image x="' + PAD + '" y="' + LOGO_Y + '" width="148" height="' + LOGO_H + '" href="' + logoBase64 + '" preserveAspectRatio="xMinYMid meet"/>');
+    parts.push('<image x="' + PAD + '" y="' + LOGO_Y + '" width="147" height="42" href="' + logoBase64 + '" preserveAspectRatio="xMinYMid meet"/>');
   }
 
-  // Industry image — rounded, full width minus padding
+  // Industry image
   if (bgBase64) {
-    parts.push('<image x="' + IMG_X + '" y="' + IMG_TOP + '" width="' + IMG_W + '" height="' + IMG_H + '" href="' + bgBase64 + '" preserveAspectRatio="xMidYMid slice" clip-path="url(#imgClip)" opacity="0.95"/>');
-    // Bottom fade on image
-    parts.push('<rect x="' + IMG_X + '" y="' + IMG_TOP + '" width="' + IMG_W + '" height="' + IMG_H + '" fill="url(#fade)" clip-path="url(#imgClip)"/>');
+    parts.push('<image x="' + IMG_X + '" y="' + IMG_Y + '" width="' + IMG_W + '" height="' + IMG_H + '" href="' + bgBase64 + '" preserveAspectRatio="xMidYMid slice" clip-path="url(#imgClip)"/>');
+    // Gradient 1 on top of image
+    parts.push('<rect x="' + IMG_X + '" y="' + IMG_Y + '" width="' + IMG_W + '" height="' + IMG_H + '" fill="url(#grad1)" clip-path="url(#imgClip)"/>');
+    // Gradient 2 — accent tint at 0% opacity (transparent layer per spec, kept for future use)
   }
 
-  // Overlay — centred on the image
   // Overlay — positioned per industry
   if (overlayBase64) {
     const ind = industry.toLowerCase();
@@ -217,46 +233,42 @@ module.exports = async function handler(req, res) {
 
     let OV_X, OV_Y;
     if (isAccountants) {
-      // Bottom-right of image, near the laptop
       OV_X = IMG_X + IMG_W - OV_W - 40;
-      OV_Y = IMG_TOP + IMG_H - OV_H - 30;
+      OV_Y = IMG_Y + IMG_H - OV_H - 30;
     } else if (isRestaurants) {
-      // Centre horizontally, upper third of image
       OV_X = IMG_X + (IMG_W - OV_W) / 2;
-      OV_Y = IMG_TOP + 40;
+      OV_Y = IMG_Y + 40;
     } else {
-      // Legal and realestate — centred
       OV_X = IMG_X + (IMG_W - OV_W) / 2;
-      OV_Y = IMG_TOP + (IMG_H - OV_H) / 2;
+      OV_Y = IMG_Y + (IMG_H - OV_H) / 2;
     }
-
     parts.push('<image x="' + OV_X + '" y="' + OV_Y + '" width="' + OV_W + '" height="' + OV_H + '" href="' + overlayBase64 + '" preserveAspectRatio="xMidYMid meet"/>');
   }
 
-  // Pill label — left
-  parts.push('<rect x="' + PAD + '" y="' + PILL_Y + '" width="' + pillWidth + '" height="' + PILL_H + '" rx="17" fill="none" stroke="' + accent + '" stroke-width="1.5"/>');
-  parts.push('<text x="' + (PAD + pillWidth / 2) + '" y="' + (PILL_Y + PILL_H / 2 + 4) + '" font-family="Arial,sans-serif" font-size="11" font-weight="bold" fill="' + accent + '" text-anchor="middle" letter-spacing="1">' + config.label + '</text>');
+  // Pill label
+  parts.push('<rect x="' + PAD + '" y="' + PILL_Y + '" width="' + pillWidth + '" height="' + PILL_H + '" rx="100" fill="none" stroke="' + accent + '" stroke-width="1"/>');
+  parts.push('<text x="' + (PAD + pillWidth / 2) + '" y="' + PILL_TEXT_Y + '" font-family="Inter,Arial,sans-serif" font-size="13" font-weight="700" fill="' + accent + '" text-anchor="middle" letter-spacing="1">' + config.label + '</text>');
 
-  // URL — right, same row as pill
-  parts.push('<text x="' + (CARD_W - PAD) + '" y="' + (PILL_Y + PILL_H / 2 + 4) + '" font-family="Arial,sans-serif" font-size="13" font-weight="bold" fill="' + urlColor + '" text-anchor="end" text-decoration="underline">pruxin.com/clara</text>');
+  // URL — right aligned, same Y as pill text
+  parts.push('<text x="' + (CARD_W - PAD) + '" y="' + PILL_TEXT_Y + '" font-family="Inter,Arial,sans-serif" font-size="16" font-weight="600" fill="#B4C9EB" text-anchor="end" text-decoration="underline" letter-spacing="-0.5">pruxin.com/clara</text>');
 
-  // Headline
+  // Headline — 72px / 700 / -2px tracking / 120% line-height
   lines.forEach(function(line, i) {
-    parts.push('<text x="' + PAD + '" y="' + (HEADLINE_Y + i * LINE_H) + '" font-family="Arial,sans-serif" font-size="52" font-weight="900" fill="' + textColor + '" letter-spacing="-2">' + line + '</text>');
+    parts.push('<text x="' + PAD + '" y="' + (HEADLINE_Y + i * LINE_H) + '" font-family="Inter,Arial,sans-serif" font-size="72" font-weight="700" fill="' + textColor + '" letter-spacing="-2">' + line + '</text>');
   });
 
-  // Subheadline
-  parts.push('<text x="' + PAD + '" y="' + SUB_Y1 + '" font-family="Arial,sans-serif" font-size="18" fill="' + subColor + '">' + subLine1 + '</text>');
+  // Subheadline — 24px / 400 / -0.5px tracking
+  parts.push('<text x="' + PAD + '" y="' + SUB_Y1 + '" font-family="Inter,Arial,sans-serif" font-size="24" font-weight="400" fill="' + subColor + '" letter-spacing="-0.5">' + subLine1 + '</text>');
   if (subLine2) {
-    parts.push('<text x="' + PAD + '" y="' + SUB_Y2 + '" font-family="Arial,sans-serif" font-size="18" fill="' + subColor + '">' + subLine2 + '</text>');
+    parts.push('<text x="' + PAD + '" y="' + SUB_Y2 + '" font-family="Inter,Arial,sans-serif" font-size="24" font-weight="400" fill="' + subColor + '" letter-spacing="-0.5">' + subLine2 + '</text>');
   }
 
-  // Pain stat
-  parts.push('<text x="' + PAD + '" y="' + STAT_Y + '" font-family="Arial,sans-serif" font-size="16" font-weight="bold" fill="' + accent + '">' + painstat + '</text>');
+  // Pain stat — 24px / 500 / accent colour
+  parts.push('<text x="' + PAD + '" y="' + STAT_Y + '" font-family="Inter,Arial,sans-serif" font-size="24" font-weight="500" fill="' + accent + '" letter-spacing="-0.5">' + painstat + '</text>');
 
-  // CTA — full width
-  parts.push('<rect x="' + PAD + '" y="' + BTN_Y + '" width="' + BTN_W + '" height="' + BTN_H + '" rx="30" fill="' + config.ctaColor + '"/>');
-  parts.push('<text x="' + (CARD_W / 2) + '" y="' + (BTN_Y + BTN_H / 2 + 6) + '" font-family="Arial,sans-serif" font-size="15" font-weight="bold" fill="' + config.ctaTextColor + '" text-anchor="middle" letter-spacing="0.5">' + cta.toUpperCase() + '</text>');
+  // CTA button — full width, 100px radius, 24px padding
+  parts.push('<rect x="' + PAD + '" y="' + BTN_Y + '" width="' + BTN_W + '" height="' + BTN_H + '" rx="100" fill="' + config.ctaColor + '"/>');
+  parts.push('<text x="' + (CARD_W / 2) + '" y="' + (BTN_Y + BTN_H / 2 + 10) + '" font-family="Inter,Arial,sans-serif" font-size="24" font-weight="700" fill="' + config.ctaTextColor + '" text-anchor="middle" letter-spacing="-0.5">' + cta.toUpperCase() + '</text>');
 
   parts.push('</svg>');
 
