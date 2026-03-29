@@ -98,27 +98,32 @@ module.exports = async function handler(req, res) {
     const CARD_H = 628;
     const PAD = 40;
 
-   // LinkedIn: split at period if second sentence is 3 words or fewer, otherwise 3 words per line
-    let liLines = [];
-    const stripped = headline.replace(/\.$/, '');
-    if (stripped.includes('.')) {
-      const sentences = headline.split('.').filter(function(s) { return s.trim(); }).map(function(s) { return s.trim() + '.'; });
-      const lastSentenceWords = sentences[sentences.length - 1].split(' ').length;
-      if (lastSentenceWords <= 3) {
-        liLines = sentences;
+   // LinkedIn: each sentence on its own line if ≤4 words, otherwise split every 3 words
+    function liSplit(text) {
+      const result = [];
+      const stripped = text.replace(/\.$/, '');
+      if (stripped.includes('.')) {
+        const sentences = text.split('.').filter(function(s) { return s.trim(); }).map(function(s) { return s.trim() + '.'; });
+        sentences.forEach(function(sentence) {
+          const sw = sentence.split(' ');
+          if (sw.length <= 4) {
+            result.push(sentence);
+          } else {
+            for (let i = 0; i < sw.length; i += 3) {
+              result.push(sw.slice(i, i + 3).join(' '));
+            }
+          }
+        });
       } else {
-        const liWords = headline.split(' ');
-        for (let i = 0; i < liWords.length; i += 3) {
-          liLines.push(liWords.slice(i, i + 3).join(' '));
+        const w = text.split(' ');
+        for (let i = 0; i < w.length; i += 3) {
+          result.push(w.slice(i, i + 3).join(' '));
         }
       }
-    } else {
-      const liWords = headline.split(' ');
-      for (let i = 0; i < liWords.length; i += 3) {
-        liLines.push(liWords.slice(i, i + 3).join(' '));
-      }
+      return result;
     }
-
+    const liLines = liSplit(headline);
+    
     // Logo — sits ABOVE content zone, outside it
     const LOGO_Y = 16;
     const LOGO_H = 42;
