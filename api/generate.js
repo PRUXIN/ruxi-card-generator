@@ -152,7 +152,7 @@ module.exports = async function handler(req, res) {
     // Subheadline: 16px below headline
     const SUB_FONT = 17;
     const SUB_LINE_H = 26;
-    const SUB_Y = HEADLINE_END + 16 + SUB_FONT;
+    const SUB_Y = HEADLINE_END + 28 + SUB_FONT;
     const lastSubY = subLines.length > 1 ? SUB_Y + SUB_LINE_H : SUB_Y;
 
     // Stat: 32px below last sub line
