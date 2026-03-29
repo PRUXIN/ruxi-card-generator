@@ -98,11 +98,25 @@ module.exports = async function handler(req, res) {
     const CARD_H = 628;
     const PAD = 40;
 
-    // LinkedIn: always split by words, max 3 per line
-    const liWords = headline.split(' ');
-    const liLines = [];
-    for (let i = 0; i < liWords.length; i += 3) {
-      liLines.push(liWords.slice(i, i + 3).join(' '));
+   // LinkedIn: split at period if second sentence is 3 words or fewer, otherwise 3 words per line
+    let liLines = [];
+    const stripped = headline.replace(/\.$/, '');
+    if (stripped.includes('.')) {
+      const sentences = headline.split('.').filter(function(s) { return s.trim(); }).map(function(s) { return s.trim() + '.'; });
+      const lastSentenceWords = sentences[sentences.length - 1].split(' ').length;
+      if (lastSentenceWords <= 3) {
+        liLines = sentences;
+      } else {
+        const liWords = headline.split(' ');
+        for (let i = 0; i < liWords.length; i += 3) {
+          liLines.push(liWords.slice(i, i + 3).join(' '));
+        }
+      }
+    } else {
+      const liWords = headline.split(' ');
+      for (let i = 0; i < liWords.length; i += 3) {
+        liLines.push(liWords.slice(i, i + 3).join(' '));
+      }
     }
 
     // Logo — sits ABOVE content zone, outside it
