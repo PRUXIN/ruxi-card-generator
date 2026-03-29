@@ -237,14 +237,14 @@ module.exports = async function handler(req, res) {
   const PILL_H = 37;
   const pillWidth = config.label.length * 9.2 + 32;
 
-  const HL_FONT = 72;
-  const HL_LINE_H = 87;
+  const HL_FONT = 64;
+  const HL_LINE_H = 78;
   const HEADLINE_Y = PILL_Y + PILL_H + 16 + HL_FONT;              // 682
   const HEADLINE_END = HEADLINE_Y + (lines.length - 1) * HL_LINE_H;
 
   const SUB_FONT = 24;
   const SUB_LINE_H = 36;
-  const SUB_Y = HEADLINE_END + 16 + SUB_FONT;
+  const SUB_Y = HEADLINE_END + 28 + SUB_FONT;
   const lastSubY = subLines.length > 1 ? SUB_Y + SUB_LINE_H : SUB_Y;
   const STAT_Y = lastSubY + 32 + SUB_FONT;
 
