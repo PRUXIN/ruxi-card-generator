@@ -126,7 +126,7 @@ module.exports = async function handler(req, res) {
     parts.push('<text x="' + (pillX + pillWidth / 2) + '" y="' + pillTextY + '" font-family="Arial,sans-serif" font-size="11" font-weight="bold" fill="' + accent + '" text-anchor="middle" letter-spacing="1">' + config.label + '</text>');
 
     lines.forEach(function(line, i) {
-      parts.push('<text x="40" y="' + (headlineStartY + i * lineHeight) + '" font-family="Arial,sans-serif" font-size="72" font-weight="900" fill="' + textColor + '" letter-spacing="-2">' + line + '</text>');
+      parts.push('<text x="40" y="' + (headlineStartY + i * lineHeight) + '" font-family="Arial,sans-serif" font-size="46" font-weight="900" fill="' + textColor + '" letter-spacing="-2">' + line + '</text>');
     });
 
     parts.push('<text x="40" y="' + (headlineEndY + 30) + '" font-family="Arial,sans-serif" font-size="17" fill="' + subColor + '">' + subLine1 + '</text>');
