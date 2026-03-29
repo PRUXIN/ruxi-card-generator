@@ -229,11 +229,10 @@ module.exports = async function handler(req, res) {
 
   // Pill — border rect
   parts.push('<rect x="' + PAD + '" y="' + PILL_Y + '" width="' + pillWidth + '" height="' + PILL_H + '" rx="100" fill="none" stroke="' + accent + '" stroke-width="1.5"/>');
-  // Pill text — y is the CENTRE of the rect, dominant-baseline="middle" centres text on y
-  parts.push('<text x="' + (PAD + pillWidth / 2) + '" y="' + PILL_MID + '" font-family="Inter,Arial,sans-serif" font-size="13" font-weight="700" fill="' + accent + '" text-anchor="middle" dominant-baseline="middle" letter-spacing="1">' + config.label + '</text>');
+  parts.push('<text x="' + (PAD + pillWidth / 2) + '" y="' + (PILL_Y + 23) + '" font-family="Inter,Arial,sans-serif" font-size="13" font-weight="700" fill="' + accent + '" text-anchor="middle" letter-spacing="1">' + config.label + '</text>');
 
   // URL — vertically aligned with pill
-  parts.push('<text x="' + (CARD_W - PAD) + '" y="' + PILL_MID + '" font-family="Inter,Arial,sans-serif" font-size="16" font-weight="600" fill="#B4C9EB" text-anchor="end" dominant-baseline="middle" text-decoration="underline" letter-spacing="-0.5">pruxin.com/clara</text>');
+  parts.push('<text x="' + (CARD_W - PAD) + '" y="' + (PILL_Y + 23) + '" font-family="Inter,Arial,sans-serif" font-size="16" font-weight="600" fill="#B4C9EB" text-anchor="end" text-decoration="underline" letter-spacing="-0.5">pruxin.com/clara</text>');
 
   // Headline
   lines.forEach(function(line, i) {
@@ -251,7 +250,7 @@ module.exports = async function handler(req, res) {
 
   // CTA — sits 20px below stat, stretches full width
   parts.push('<rect x="' + PAD + '" y="' + BTN_Y_CALC + '" width="' + BTN_W + '" height="' + BTN_H + '" rx="100" fill="' + config.ctaColor + '"/>');
-  parts.push('<text x="' + (CARD_W / 2) + '" y="' + (BTN_Y_CALC + BTN_H / 2) + '" font-family="Inter,Arial,sans-serif" font-size="24" font-weight="700" fill="' + config.ctaTextColor + '" text-anchor="middle" dominant-baseline="middle" letter-spacing="-0.5">' + cta.toUpperCase() + '</text>');
+ parts.push('<text x="' + (CARD_W / 2) + '" y="' + (BTN_Y_CALC + 52) + '" font-family="Inter,Arial,sans-serif" font-size="24" font-weight="700" fill="' + config.ctaTextColor + '" text-anchor="middle" letter-spacing="-0.5">' + cta.toUpperCase() + '</text>');
 
   parts.push('</svg>');
 
