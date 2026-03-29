@@ -205,12 +205,31 @@ module.exports = async function handler(req, res) {
   }
 
   // Overlay — centred on the image
+  // Overlay — positioned per industry
   if (overlayBase64) {
-    const isLegal = industry.toLowerCase() === 'legal';
+    const ind = industry.toLowerCase();
+    const isLegal = ind === 'legal';
+    const isAccountants = ind === 'accountants';
+    const isRestaurants = ind === 'restaurants';
+
     const OV_W = isLegal ? 360 : 280;
     const OV_H = isLegal ? 290 : 170;
-    const OV_X = IMG_X + (IMG_W - OV_W) / 2;
-    const OV_Y = IMG_TOP + (IMG_H - OV_H) / 2;
+
+    let OV_X, OV_Y;
+    if (isAccountants) {
+      // Bottom-right of image, near the laptop
+      OV_X = IMG_X + IMG_W - OV_W - 40;
+      OV_Y = IMG_TOP + IMG_H - OV_H - 30;
+    } else if (isRestaurants) {
+      // Centre horizontally, upper third of image
+      OV_X = IMG_X + (IMG_W - OV_W) / 2;
+      OV_Y = IMG_TOP + 40;
+    } else {
+      // Legal and realestate — centred
+      OV_X = IMG_X + (IMG_W - OV_W) / 2;
+      OV_Y = IMG_TOP + (IMG_H - OV_H) / 2;
+    }
+
     parts.push('<image x="' + OV_X + '" y="' + OV_Y + '" width="' + OV_W + '" height="' + OV_H + '" href="' + overlayBase64 + '" preserveAspectRatio="xMidYMid meet"/>');
   }
 
