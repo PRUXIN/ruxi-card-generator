@@ -247,10 +247,10 @@ module.exports = async function handler(req, res) {
 
   // Pill label
  parts.push('<rect x="' + PAD + '" y="' + PILL_Y + '" width="' + pillWidth + '" height="' + PILL_H + '" rx="100" fill="none" stroke="' + accent + '" stroke-width="1.5"/>');
-  parts.push('<text x="' + (PAD + pillWidth / 2) + '" y="' + (PILL_Y + PILL_H / 2 + 5) + '" font-family="Inter,Arial,sans-serif" font-size="13" font-weight="700" fill="' + accent + '" text-anchor="middle" letter-spacing="1">' + config.label + '</text>');
+  parts.push('<text x="' + (PAD + pillWidth / 2) + '" y="' + (PILL_Y + 25) + '" font-family="Inter,Arial,sans-serif" font-size="13" font-weight="700" fill="' + accent + '" text-anchor="middle" dominant-baseline="middle" letter-spacing="1">' + config.label + '</text>');
   
   // URL — right aligned, same Y as pill text
-  parts.push('<text x="' + (CARD_W - PAD) + '" y="' + (PILL_Y + PILL_H / 2 + 5) + '" font-family="Inter,Arial,sans-serif" font-size="16" font-weight="600" fill="#B4C9EB" text-anchor="end" text-decoration="underline" letter-spacing="-0.5">pruxin.com/clara</text>');
+  parts.push('<text x="' + (CARD_W - PAD) + '" y="' + (PILL_Y + 25) + '" font-family="Inter,Arial,sans-serif" font-size="16" font-weight="600" fill="#B4C9EB" text-anchor="end" text-decoration="underline" letter-spacing="-0.5">pruxin.com/clara</text>');
 
   // Headline — 72px / 700 / -2px tracking / 120% line-height
   lines.forEach(function(line, i) {
