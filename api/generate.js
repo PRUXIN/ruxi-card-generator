@@ -145,89 +145,101 @@ module.exports = async function handler(req, res) {
   }
 
   // ─── INSTAGRAM LAYOUT (1080×1080) ─────────────────────
-  // Top half: image + overlay + logo + pill + URL
-  // Bottom half: headline + subheadline + painstat + full-width CTA
   const CARD_W = 1080;
   const CARD_H = 1080;
-  const HALF = 540;
-  const PAD = 48;
+  const PAD = 40;
+  const CORNER = 20;
 
-  // Bottom content positions
-  const bottomBg = bg;
-  const headlineFS = 52;
-  const lineHeightIG = 64;
-  const headlineTopY = HALF + PAD + headlineFS;
-  const headlineEndY = headlineTopY + (lines.length * lineHeightIG);
-  const subY1 = headlineEndY + 24;
-  const subY2 = subY1 + 30;
-  const statY = (subLine2 ? subY2 : subY1) + 36;
-  const btnY = statY + 32;
+  // Zones
+  const LOGO_Y = 28;
+  const LOGO_H = 42;
+  const IMG_TOP = LOGO_Y + LOGO_H + 16;   // image starts just below logo
+  const IMG_W = CARD_W - PAD * 2;          // 1000px wide with padding
+  const IMG_H = 390;                        // fixed image height
+  const IMG_X = PAD;
+  const IMG_BOTTOM = IMG_TOP + IMG_H;       // ~476
+
+  // Content below image
+  const PILL_Y = IMG_BOTTOM + 24;
+  const PILL_H = 34;
+  const HEADLINE_Y = PILL_Y + PILL_H + 20 + 52;  // +52 for font baseline
+  const LINE_H = 62;
+  const HEADLINE_END = HEADLINE_Y + lines.length * LINE_H;
+  const SUB_Y1 = HEADLINE_END + 20;
+  const SUB_Y2 = SUB_Y1 + 30;
+  const STAT_Y = (subLine2 ? SUB_Y2 : SUB_Y1) + 36;
+  const BTN_Y = STAT_Y + 36;
+  const BTN_H = 60;
   const BTN_W = CARD_W - PAD * 2;
 
-  // Pill width
   const pillWidth = config.label.length * 7.5 + 32;
 
   const parts = [];
   parts.push('<svg width="' + CARD_W + '" height="' + CARD_H + '" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">');
 
-  // Bottom panel background
-  parts.push('<rect width="' + CARD_W + '" height="' + CARD_H + '" fill="' + bottomBg + '"/>');
-
-  // Top image
+  // Card background with rounded corners
+  parts.push('<defs>');
+  parts.push('<clipPath id="cardClip"><rect width="' + CARD_W + '" height="' + CARD_H + '" rx="' + CORNER + '"/></clipPath>');
   if (bgBase64) {
-    parts.push('<defs>');
-    parts.push('<clipPath id="imgClip"><rect x="0" y="0" width="' + CARD_W + '" height="' + HALF + '" rx="0"/></clipPath>');
+    parts.push('<clipPath id="imgClip"><rect x="' + IMG_X + '" y="' + IMG_TOP + '" width="' + IMG_W + '" height="' + IMG_H + '" rx="16"/></clipPath>');
     parts.push('<linearGradient id="fade" x1="0%" y1="0%" x2="0%" y2="100%">');
-    parts.push('<stop offset="60%" style="stop-color:' + bg + ';stop-opacity:0"/>');
+    parts.push('<stop offset="50%" style="stop-color:' + bg + ';stop-opacity:0"/>');
     parts.push('<stop offset="100%" style="stop-color:' + bg + ';stop-opacity:1"/>');
     parts.push('</linearGradient>');
-    parts.push('</defs>');
-    parts.push('<image x="0" y="0" width="' + CARD_W + '" height="' + HALF + '" href="' + bgBase64 + '" preserveAspectRatio="xMidYMid slice" clip-path="url(#imgClip)" opacity="0.9"/>');
-    parts.push('<rect x="0" y="0" width="' + CARD_W + '" height="' + HALF + '" fill="url(#fade)"/>');
+  }
+  parts.push('</defs>');
+
+  // Card background
+  parts.push('<rect width="' + CARD_W + '" height="' + CARD_H + '" fill="' + bg + '" rx="' + CORNER + '"/>');
+
+  // Clara logo — top left, above image
+  if (logoBase64) {
+    parts.push('<image x="' + PAD + '" y="' + LOGO_Y + '" width="148" height="' + LOGO_H + '" href="' + logoBase64 + '" preserveAspectRatio="xMinYMid meet"/>');
   }
 
-  // Overlay — centred in top half
+  // Industry image — rounded, full width minus padding
+  if (bgBase64) {
+    parts.push('<image x="' + IMG_X + '" y="' + IMG_TOP + '" width="' + IMG_W + '" height="' + IMG_H + '" href="' + bgBase64 + '" preserveAspectRatio="xMidYMid slice" clip-path="url(#imgClip)" opacity="0.95"/>');
+    // Bottom fade on image
+    parts.push('<rect x="' + IMG_X + '" y="' + IMG_TOP + '" width="' + IMG_W + '" height="' + IMG_H + '" fill="url(#fade)" clip-path="url(#imgClip)"/>');
+  }
+
+  // Overlay — centred on the image
   if (overlayBase64) {
     const isLegal = industry.toLowerCase() === 'legal';
-    const OV_W = isLegal ? 380 : 300;
-    const OV_H = isLegal ? 300 : 180;
-    const OV_X = (CARD_W - OV_W) / 2;
-    const OV_Y = (HALF - OV_H) / 2;
+    const OV_W = isLegal ? 360 : 280;
+    const OV_H = isLegal ? 290 : 170;
+    const OV_X = IMG_X + (IMG_W - OV_W) / 2;
+    const OV_Y = IMG_TOP + (IMG_H - OV_H) / 2;
     parts.push('<image x="' + OV_X + '" y="' + OV_Y + '" width="' + OV_W + '" height="' + OV_H + '" href="' + overlayBase64 + '" preserveAspectRatio="xMidYMid meet"/>');
   }
 
-  // Logo — top left
-  if (logoBase64) {
-    parts.push('<image x="' + PAD + '" y="28" width="148" height="42" href="' + logoBase64 + '" preserveAspectRatio="xMinYMid meet"/>');
-  }
+  // Pill label — left
+  parts.push('<rect x="' + PAD + '" y="' + PILL_Y + '" width="' + pillWidth + '" height="' + PILL_H + '" rx="17" fill="none" stroke="' + accent + '" stroke-width="1.5"/>');
+  parts.push('<text x="' + (PAD + pillWidth / 2) + '" y="' + (PILL_Y + PILL_H / 2 + 4) + '" font-family="Arial,sans-serif" font-size="11" font-weight="bold" fill="' + accent + '" text-anchor="middle" letter-spacing="1">' + config.label + '</text>');
 
-  // Pill — top left below logo
-  parts.push('<rect x="' + PAD + '" y="80" width="' + pillWidth + '" height="34" rx="17" fill="none" stroke="' + accent + '" stroke-width="1.5"/>');
-  parts.push('<text x="' + (PAD + pillWidth / 2) + '" y="102" font-family="Arial,sans-serif" font-size="11" font-weight="bold" fill="' + accent + '" text-anchor="middle" letter-spacing="1">' + config.label + '</text>');
-
-  // URL — top right
-  parts.push('<text x="' + (CARD_W - PAD) + '" y="102" font-family="Arial,sans-serif" font-size="13" font-weight="bold" fill="' + urlColor + '" text-anchor="end" text-decoration="underline">pruxin.com/clara</text>');
+  // URL — right, same row as pill
+  parts.push('<text x="' + (CARD_W - PAD) + '" y="' + (PILL_Y + PILL_H / 2 + 4) + '" font-family="Arial,sans-serif" font-size="13" font-weight="bold" fill="' + urlColor + '" text-anchor="end" text-decoration="underline">pruxin.com/clara</text>');
 
   // Headline
   lines.forEach(function(line, i) {
-    parts.push('<text x="' + PAD + '" y="' + (headlineTopY + i * lineHeightIG) + '" font-family="Arial,sans-serif" font-size="' + headlineFS + '" font-weight="900" fill="' + textColor + '" letter-spacing="-2">' + line + '</text>');
+    parts.push('<text x="' + PAD + '" y="' + (HEADLINE_Y + i * LINE_H) + '" font-family="Arial,sans-serif" font-size="52" font-weight="900" fill="' + textColor + '" letter-spacing="-2">' + line + '</text>');
   });
 
   // Subheadline
-  parts.push('<text x="' + PAD + '" y="' + subY1 + '" font-family="Arial,sans-serif" font-size="18" fill="' + subColor + '">' + subLine1 + '</text>');
+  parts.push('<text x="' + PAD + '" y="' + SUB_Y1 + '" font-family="Arial,sans-serif" font-size="18" fill="' + subColor + '">' + subLine1 + '</text>');
   if (subLine2) {
-    parts.push('<text x="' + PAD + '" y="' + subY2 + '" font-family="Arial,sans-serif" font-size="18" fill="' + subColor + '">' + subLine2 + '</text>');
+    parts.push('<text x="' + PAD + '" y="' + SUB_Y2 + '" font-family="Arial,sans-serif" font-size="18" fill="' + subColor + '">' + subLine2 + '</text>');
   }
 
   // Pain stat
-  parts.push('<text x="' + PAD + '" y="' + statY + '" font-family="Arial,sans-serif" font-size="16" font-weight="bold" fill="' + accent + '">' + painstat + '</text>');
+  parts.push('<text x="' + PAD + '" y="' + STAT_Y + '" font-family="Arial,sans-serif" font-size="16" font-weight="bold" fill="' + accent + '">' + painstat + '</text>');
 
   // CTA — full width
-  parts.push('<rect x="' + PAD + '" y="' + btnY + '" width="' + BTN_W + '" height="56" rx="28" fill="' + config.ctaColor + '"/>');
-  parts.push('<text x="' + (CARD_W / 2) + '" y="' + (btnY + 34) + '" font-family="Arial,sans-serif" font-size="15" font-weight="bold" fill="' + config.ctaTextColor + '" text-anchor="middle" letter-spacing="0.5">' + cta.toUpperCase() + '</text>');
+  parts.push('<rect x="' + PAD + '" y="' + BTN_Y + '" width="' + BTN_W + '" height="' + BTN_H + '" rx="30" fill="' + config.ctaColor + '"/>');
+  parts.push('<text x="' + (CARD_W / 2) + '" y="' + (BTN_Y + BTN_H / 2 + 6) + '" font-family="Arial,sans-serif" font-size="15" font-weight="bold" fill="' + config.ctaTextColor + '" text-anchor="middle" letter-spacing="0.5">' + cta.toUpperCase() + '</text>');
 
   parts.push('</svg>');
 
   res.setHeader('Content-Type', 'image/svg+xml');
   res.status(200).send(parts.join('\n'));
-};
