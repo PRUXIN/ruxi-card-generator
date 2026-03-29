@@ -162,22 +162,23 @@ module.exports = async function handler(req, res) {
   const PILL_H = 37;
   const PILL_MID = PILL_Y + PILL_H / 2; // 575.5
 
-  const HEADLINE_Y = PILL_Y + PILL_H + GAP + 72; // 686
-  const LINE_H = 87;
-  const HEADLINE_END = HEADLINE_Y + (lines.length - 1) * LINE_H; // 773 for 2 lines
+  // From pill to headline: 16px gap + font baseline offset
+  const HEADLINE_Y = PILL_Y + PILL_H + 16 + 72; // pill bottom + 16 + 72px baseline
+  const LINE_H = 87;                              // 72px * 1.2 line-height
+  const HEADLINE_END = HEADLINE_Y + (lines.length - 1) * LINE_H;
 
-  const SUB_Y1 = HEADLINE_END + GAP + 24; // 817
-  const SUB_Y2 = SUB_Y1 + 36;             // 853
+  // From headline to subheadline: 16px
+  const SUB_Y1 = HEADLINE_END + 16 + 24; // +24 for 24px font baseline
+  const SUB_Y2 = SUB_Y1 + 36;            // 24px * 1.5 line-height
 
+  // From subheadline to stat: 32px
   const lastSubY = subLine2 ? SUB_Y2 : SUB_Y1;
-  const STAT_Y = lastSubY + GAP + 24;     // 861 (no subLine2)
+  const STAT_Y = lastSubY + 32 + 24;     // +24 for 24px font baseline
 
+  // Button always pinned to bottom with exactly 40px padding
   const BTN_H = 80;
   const BTN_W = CARD_W - PAD * 2;
-  // Position button: use calculated pos but ensure minimum gap from stat, max = bottom - pad
-  const BTN_Y_CALC = STAT_Y + GAP;
-  const BTN_Y_MAX  = CARD_H - PAD - BTN_H; // 960
-  const BTN_Y = Math.min(BTN_Y_CALC, BTN_Y_MAX); // 881, leaves 119px — fix: use calc
+  const BTN_Y = CARD_H - PAD - BTN_H;   // always 960
 
   const pillWidth = config.label.length * 9.2 + 32;
   const grad1Start = isDark ? 'rgba(7,9,27,0)' : 'rgba(255,255,255,0)';
