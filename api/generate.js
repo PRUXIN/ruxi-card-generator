@@ -58,7 +58,25 @@ module.exports = async function handler(req, res) {
   function splitHeadline(text) {
     const stripped = text.replace(/\.$/, '');
     if (stripped.includes('.')) {
-      return text.split('.').filter(function(s) { return s.trim(); }).map(function(s) { return s.trim() + '.'; });
+      const sentences = text.split('.').filter(function(s) { return s.trim(); }).map(function(s) { return s.trim() + '.'; });
+      if (isInstagram) {
+        // Merge short consecutive sentences onto same line if combined ≤ 6 words
+        const merged = [];
+        let current = '';
+        sentences.forEach(function(sentence) {
+          const test = current ? current + ' ' + sentence : sentence;
+          const wordCount = test.split(' ').length;
+          if (wordCount <= 6 && current) {
+            current = test;
+          } else {
+            if (current) merged.push(current);
+            current = sentence;
+          }
+        });
+        if (current) merged.push(current);
+        return merged;
+      }
+      return sentences;
     }
     const words = text.split(' ');
     if (words.length <= 3) return [text];
@@ -85,12 +103,12 @@ module.exports = async function handler(req, res) {
       }
     });
     if (current) result.push(current);
-    return result.slice(0, 2);
+    return result.slice(0, 3);
   }
 
   const lines = splitHeadline(headline);
   const isInstagram = platform === 'instagram';
-  const subLines = splitSub(subheadline, isInstagram ? 80 : 45);
+  const subLines = splitSub(subheadline, isInstagram ? 80 : 55);
 
 // ── LINKEDIN / FACEBOOK (1200×628) ─────────────────────
   if (!isInstagram) {
@@ -106,7 +124,7 @@ module.exports = async function handler(req, res) {
         const sentences = text.split('.').filter(function(s) { return s.trim(); }).map(function(s) { return s.trim() + '.'; });
         sentences.forEach(function(sentence) {
           const sw = sentence.split(' ');
-          if (sw.length <= 4) {
+          if (sw.length <= 3) {
             result.push(sentence);
           } else {
             for (let i = 0; i < sw.length; i += 3) {
