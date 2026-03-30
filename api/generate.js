@@ -161,8 +161,8 @@ module.exports = async function handler(req, res) {
     const PILL_H = 34;
     const pillWidth = config.label.length * 7.5 + 32;
 
-    // Headline: 16px below pill + 56px baseline
-    const HL_FONT = 56;
+    // Headline: 16px below pill + 46px baseline
+    const HL_FONT = 46;
     const HL_LINE_H = 68;
     const HEADLINE_Y = PILL_Y + PILL_H + 16 + HL_FONT;
     const HEADLINE_END = HEADLINE_Y + (liLines.length - 1) * HL_LINE_H;
@@ -255,7 +255,7 @@ module.exports = async function handler(req, res) {
   const PILL_H = 37;
   const pillWidth = config.label.length * 9.2 + 32;
 
-  const HL_FONT = 56;
+  const HL_FONT = 46;
   const HL_LINE_H = 68;
   const HEADLINE_Y = PILL_Y + PILL_H + 16 + HL_FONT;
   const HEADLINE_END = HEADLINE_Y + (lines.length - 1) * HL_LINE_H;
