@@ -40,9 +40,9 @@ module.exports = async function handler(req, res) {
 
   const overlayFileMap = {
     'accountants': 'overlay-accountants.png',
-    'legal':       isDark ? 'overlay-legal-dark.png'        : 'overlay-legal-light.png',
+    'legal':       isDark ? 'overlay-legal-dark.png'       : 'overlay-legal-light.png',
     'realestate':  'overlay-realestate.png',
-    'restaurants': isDark ? 'overlay-restaurants-dark.png'  : 'overlay-restaurants-light.png'
+    'restaurants': isDark ? 'overlay-restaurants-dark.png' : 'overlay-restaurants-light.png'
   };
 
   const logoFile = isDark ? 'clara-logo-light.png' : 'clara-logo-dark.png';
@@ -52,15 +52,16 @@ module.exports = async function handler(req, res) {
     fetchBase64(overlayFileMap[industry.toLowerCase()])
   ]);
 
-  // ── Headline split ──────────────────────────────────────
-  // Rule 1: if multiple sentences (periods mid-string), split at each period
-  // Rule 2: otherwise split by words, max 3 words per line (4 if >6 words)
+  // isInstagram must be defined before splitHeadline
+  const isInstagram = platform === 'instagram';
+
+  // Headline split
   function splitHeadline(text) {
     const stripped = text.replace(/\.$/, '');
     if (stripped.includes('.')) {
       const sentences = text.split('.').filter(function(s) { return s.trim(); }).map(function(s) { return s.trim() + '.'; });
       if (isInstagram) {
-        // Merge short consecutive sentences onto same line if combined ≤ 6 words
+        // Merge short consecutive sentences onto same line if combined <= 6 words
         const merged = [];
         let current = '';
         sentences.forEach(function(sentence) {
@@ -88,7 +89,7 @@ module.exports = async function handler(req, res) {
     return result;
   }
 
-  // ── Subheadline split (max 50 chars per line, max 2 lines) ──
+  // Subheadline split
   function splitSub(text, maxChars) {
     const words = text.split(' ');
     const result = [];
@@ -107,16 +108,15 @@ module.exports = async function handler(req, res) {
   }
 
   const lines = splitHeadline(headline);
-  const isInstagram = platform === 'instagram';
   const subLines = splitSub(subheadline, isInstagram ? 80 : 55);
 
-// ── LINKEDIN / FACEBOOK (1200×628) ─────────────────────
+  // ── LINKEDIN / FACEBOOK (1200×628) ─────────────────────
   if (!isInstagram) {
     const CARD_W = 1200;
     const CARD_H = 628;
     const PAD = 40;
 
-   // LinkedIn: each sentence on its own line if ≤4 words, otherwise split every 3 words
+    // LinkedIn: each sentence on its own line if <=3 words, otherwise split every 3 words
     function liSplit(text) {
       const result = [];
       const stripped = text.replace(/\.$/, '');
@@ -141,7 +141,7 @@ module.exports = async function handler(req, res) {
       return result;
     }
     const liLines = liSplit(headline);
-    
+
     // Logo — sits ABOVE content zone, outside it
     const LOGO_Y = 16;
     const LOGO_H = 42;
@@ -167,11 +167,11 @@ module.exports = async function handler(req, res) {
     const HEADLINE_Y = PILL_Y + PILL_H + 16 + HL_FONT;
     const HEADLINE_END = HEADLINE_Y + (liLines.length - 1) * HL_LINE_H;
 
-    // Subheadline: 16px below headline
+    // Subheadline: 28px below headline
     const SUB_FONT = 17;
     const SUB_LINE_H = 26;
     const SUB_Y = HEADLINE_END + 28 + SUB_FONT;
-    const lastSubY = subLines.length > 1 ? SUB_Y + SUB_LINE_H : SUB_Y;
+    const lastSubY = subLines.length > 1 ? SUB_Y + (subLines.length - 1) * SUB_LINE_H : SUB_Y;
 
     // Stat: 32px below last sub line
     const STAT_Y = lastSubY + 32 + 15;
@@ -179,8 +179,8 @@ module.exports = async function handler(req, res) {
     // URL pinned 40px from card bottom
     const BTN_H = 48;
     const BTN_W = 230;
-    const URL_Y = CARD_H - PAD;             // 588 always
-    const BTN_Y_PINNED = URL_Y - 24 - BTN_H; // 516
+    const URL_Y = CARD_H - PAD;
+    const BTN_Y_PINNED = URL_Y - 24 - BTN_H;
     const BTN_Y_NATURAL = STAT_Y + 32;
     const BTN_Y = Math.max(BTN_Y_PINNED, BTN_Y_NATURAL);
 
@@ -236,14 +236,14 @@ module.exports = async function handler(req, res) {
     res.setHeader('Content-Type', 'image/svg+xml');
     return res.status(200).send(parts.join('\n'));
   }
-  
+
   // ── INSTAGRAM (1080×1080) ───────────────────────────────
   const CARD_W = 1080;
   const CARD_H = 1080;
   const PAD = 40;
   const GAP = 20;
 
-  const LOGO_Y = PAD;                          // 40
+  const LOGO_Y = PAD;
   const LOGO_H = 42;
   const IMG_X = PAD;
   const IMG_Y = LOGO_Y + LOGO_H + GAP;         // 102
@@ -257,13 +257,13 @@ module.exports = async function handler(req, res) {
 
   const HL_FONT = 56;
   const HL_LINE_H = 68;
-  const HEADLINE_Y = PILL_Y + PILL_H + 16 + HL_FONT;              // 682
+  const HEADLINE_Y = PILL_Y + PILL_H + 16 + HL_FONT;
   const HEADLINE_END = HEADLINE_Y + (lines.length - 1) * HL_LINE_H;
 
   const SUB_FONT = 24;
   const SUB_LINE_H = 36;
   const SUB_Y = HEADLINE_END + 28 + SUB_FONT;
-  const lastSubY = subLines.length > 1 ? SUB_Y + SUB_LINE_H : SUB_Y;
+  const lastSubY = subLines.length > 1 ? SUB_Y + (subLines.length - 1) * SUB_LINE_H : SUB_Y;
   const STAT_Y = lastSubY + 32 + SUB_FONT;
 
   const BTN_H = 80;
