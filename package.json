@@ -1,14 +1,19 @@
 {
-  "name": "clara-card-generator",
+  "name": "ruxi-card-generator",
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start"
+    "build": "echo 'built'"
+  },
+  "engines": {
+    "node": "24.x"
   },
   "dependencies": {
+<<<<<<< vercel/react-server-components-cve-vu-d3xsia
     "next": "15.2.8",
     "@vercel/og": "0.6.2"
+=======
+    "sharp": "^0.33.5"
+>>>>>>> main
   }
 }
