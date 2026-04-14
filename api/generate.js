@@ -3,7 +3,7 @@ const sharp = require('sharp');
 module.exports = async function handler(req, res) {
   const industry = req.query.industry || 'accountants';
   const theme = req.query.theme || 'dark';
-  const headline = req.query.headline || 'Your phones ring at 9pm. Clara answers.';
+  const headline = req.query.headline || 'Your phones ring at 9pm. ruxi answers.';
   const subheadline = req.query.subheadline || 'Never miss a new client enquiry.';
   const painstat = req.query.painstat || '62% of clients switch firms due to poor communication';
   const cta = req.query.cta || 'Book a Demo';
@@ -23,7 +23,7 @@ module.exports = async function handler(req, res) {
   const subColor = isDark ? '#AAAACC' : '#444444';
   const urlColor = isDark ? '#8899BB' : '#132F67';
   const accent = config.accent;
-  const baseUrl = 'https://raw.githubusercontent.com/PRUXIN/clara-card-generator/main/assets';
+  const baseUrl = 'https://raw.githubusercontent.com/PRUXIN/ruxi-card-generator/main/assets';
 
   async function fetchBase64(filename, isBackground) {
     try {
@@ -54,7 +54,7 @@ module.exports = async function handler(req, res) {
     'restaurants': isDark ? 'overlay-restaurants-dark.png' : 'overlay-restaurants-light.png'
   };
 
-  const logoFile = isDark ? 'clara-logo-light.png' : 'clara-logo-dark.png';
+  const logoFile = isDark ? 'ruxi-logo-light.png' : 'ruxi-logo-dark.png';
 
   const [bgBase64, logoBase64, overlayBase64] = await Promise.all([
     fetchBase64(config.file, true),
@@ -220,7 +220,7 @@ module.exports = async function handler(req, res) {
     parts.push('<rect x="' + PAD + '" y="' + BTN_Y + '" width="' + BTN_W + '" height="' + BTN_H + '" rx="24" fill="' + config.ctaColor + '"/>');
     parts.push('<text x="' + (PAD + BTN_W / 2) + '" y="' + (BTN_Y + BTN_H / 2 + 5) + '" font-family="Arial,sans-serif" font-size="13" font-weight="bold" fill="' + config.ctaTextColor + '" text-anchor="middle" letter-spacing="0.5">' + cta.toUpperCase() + '</text>');
 
-    parts.push('<text x="' + (PAD + BTN_W / 2) + '" y="' + (BTN_Y + BTN_H + 24) + '" font-family="Arial,sans-serif" font-size="13" font-weight="bold" fill="' + urlColor + '" text-anchor="middle" text-decoration="underline">pruxin.com/clara</text>');
+    parts.push('<text x="' + (PAD + BTN_W / 2) + '" y="' + (BTN_Y + BTN_H + 24) + '" font-family="Arial,sans-serif" font-size="13" font-weight="bold" fill="' + urlColor + '" text-anchor="middle" text-decoration="underline">pruxin.com/ruxi</text>');
 
     parts.push('</svg>');
     res.setHeader('Content-Type', 'image/svg+xml');
@@ -304,7 +304,7 @@ module.exports = async function handler(req, res) {
 
   parts.push('<rect x="' + PAD + '" y="' + PILL_Y + '" width="' + pillWidth + '" height="' + PILL_H + '" rx="17" fill="none" stroke="' + accent + '" stroke-width="1.5"/>');
   parts.push('<text x="' + (PAD + pillWidth / 2) + '" y="' + (PILL_Y + PILL_H / 2 + 5) + '" font-family="Inter,Arial,sans-serif" font-size="13" font-weight="700" fill="' + accent + '" text-anchor="middle" letter-spacing="1">' + config.label + '</text>');
-  parts.push('<text x="' + (CARD_W - PAD) + '" y="' + (PILL_Y + PILL_H / 2 + 5) + '" font-family="Inter,Arial,sans-serif" font-size="16" font-weight="600" fill="' + urlColor + '" text-anchor="end" text-decoration="underline" letter-spacing="-0.5">pruxin.com/clara</text>');
+  parts.push('<text x="' + (CARD_W - PAD) + '" y="' + (PILL_Y + PILL_H / 2 + 5) + '" font-family="Inter,Arial,sans-serif" font-size="16" font-weight="600" fill="' + urlColor + '" text-anchor="end" text-decoration="underline" letter-spacing="-0.5">pruxin.com/ruxi</text>');
 
   lines.forEach(function(line, i) {
     parts.push('<text x="' + PAD + '" y="' + (HEADLINE_Y + i * HL_LINE_H) + '" font-family="Inter,Arial,sans-serif" font-size="' + HL_FONT + '" font-weight="700" fill="' + textColor + '" letter-spacing="-2">' + line + '</text>');
